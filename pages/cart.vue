@@ -3,49 +3,7 @@
     <div>
       <h1 class="text-3xl font-bold mb-4">Cart</h1>
       <div class="bg-white p-6 rounded-lg shadow-md">
-        <table class="min-w-full">
-          <thead>
-            <tr>
-              <th
-                class="p-2 bg-gray-200 text-left text-sm font-medium text-gray-700"
-              >
-                Id
-              </th>
-              <th
-                class="p-2 bg-gray-200 text-left text-sm font-medium text-gray-700"
-              >
-                Product
-              </th>
-
-              <th
-                class="p-2 bg-gray-200 text-left text-sm font-medium text-gray-700"
-              >
-                Price
-              </th>
-              <th
-                class="p-2 bg-gray-200 text-left text-sm font-medium text-gray-700"
-              >
-                Quantuty
-              </th>
-              <th
-                class="p-2 bg-gray-200 text-left text-sm font-medium text-gray-700"
-              >
-                Total price
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="cartItem in data" :key="cartItem.id" class="border-t">
-              <td class="p-2">{{ cartItem.id }}</td>
-              <td class="p-2">{{ cartItem.product?.name }}</td>
-              <td class="p-2">{{ cartItem.product?.price }}</td>
-              <td class="p-2">{{ cartItem.quantity }}</td>
-              <td class="p-2">
-                {{ (cartItem.product?.price || 0) * cartItem.quantity }}
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <Table :headers="tableHeaders" :rows="mappedRows" />
         <div class="mt-4 flex justify-between gap-2">
           <button
             v-if="totalItem"
@@ -79,12 +37,35 @@
 </template>
 
 <script setup lang="ts">
-import type { CartItem } from "~/interfaces";
+import type { CartItem, TableHeader } from "~/interfaces";
 import { CartItemAssociationView } from "~/utils/constants";
 
 definePageMeta({
   middleware: "auth",
 });
+
+const tableHeaders: TableHeader[] = [
+  {
+    label: "Id",
+    key: "id",
+  },
+  {
+    label: "Product",
+    key: "product",
+  },
+  {
+    label: "Price",
+    key: "price",
+  },
+  {
+    label: "Quantity",
+    key: "quantity",
+  },
+  {
+    label: "Total price",
+    key: "totalPrice",
+  },
+];
 
 const nuxtApp = useNuxtApp();
 const { $toast } = nuxtApp;
@@ -112,6 +93,15 @@ const pageOptions = computed(() => {
   return pages;
 });
 
+const mappedRows = computed(() => {
+  return data.value.map((e) => ({
+    ...e,
+    product: e.product?.name,
+    price: e.product?.price,
+    totalPrice: (e.product?.price || 0) * e.quantity,
+  }));
+});
+
 const makeOrder = async () => {
   if (!authStore.accessToken) {
     return;
@@ -124,7 +114,7 @@ const makeOrder = async () => {
 
   if (response?.message === "success") {
     $toast(`Make an order successfully.`, { type: "success" });
-    navigateTo('/order')
+    navigateTo("/order");
   }
   if (error) {
     $toast(error?.data?.message || "Make an order failed.", {

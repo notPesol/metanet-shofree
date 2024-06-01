@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col gap-4">
     <div>
-      <h1 class="text-3xl font-bold mb-4">Cart</h1>
+      <h1 class="text-3xl font-bold mb-4">Order</h1>
       <div class="bg-white p-6 rounded-lg shadow-md">
         <div class="flex gap-2 items-center justify-end mb-4">
           <label for="status" class="block text-gray-700 font-semibold"
@@ -21,65 +21,27 @@
             </option>
           </select>
         </div>
-        <table class="min-w-full">
-          <thead>
-            <tr>
-              <th
-                class="p-2 bg-gray-200 text-left text-sm font-medium text-gray-700"
+        <Table :headers="tableHeaders" :rows="mappedRows">
+          <template #action="{ row }">
+            <div class="flex gap-2">
+              <template v-if="row.status === 'pending'">
+                <button
+                  @click="payOrder(row.id)"
+                  class="bg-green-700 text-white p-2 rounded hover:bg-gray-700"
+                >
+                  Pay
+                </button>
+              </template>
+              <button
+                @click="selectedOrder = row"
+                class="bg-blue-700 text-white p-2 rounded hover:bg-gray-700"
               >
-                Id
-              </th>
-              <th
-                class="p-2 bg-gray-200 text-left text-sm font-medium text-gray-700"
-              >
-                Total amount
-              </th>
-
-              <th
-                class="p-2 bg-gray-200 text-left text-sm font-medium text-gray-700"
-              >
-                Status
-              </th>
-              <th
-                class="p-2 bg-gray-200 text-left text-sm font-medium text-gray-700"
-              >
-                Created at
-              </th>
-              <th
-                class="p-2 bg-gray-200 text-left text-sm font-medium text-gray-700"
-              >
-                Updated at
-              </th>
-              <th
-                class="p-2 bg-gray-200 text-left text-sm font-medium text-gray-700"
-              >
-                Action
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="order in data" :key="order.id" class="border-t">
-              <td class="p-2">{{ order.id }}</td>
-              <td class="p-2">{{ order.totalAmount }}</td>
-              <td class="p-2">{{ mapOrderStatus[order.status] }}</td>
-              <td class="p-2">{{ formatDateTime(order.createdAt) }}</td>
-              <td class="p-2">{{ formatDateTime(order.updatedAt) }}</td>
-              <td class="p-2">
-                <template v-if="order.status === 'pending'">
-                  <button
-                    v-if="order.status === 'pending'"
-                    @click="payOrder(order.id)"
-                    class="bg-green-700 text-white p-2 rounded hover:bg-gray-700"
-                  >
-                    Pay
-                  </button>
-                </template>
-                <template v-else>-</template>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        <div class="mt-4 flex justify-between gap-2">
+                View
+              </button>
+            </div>
+          </template>
+        </Table>
+        <div class="mt-4 flex justify-end gap-2">
           <div class="flex gap-2 items-center justify-end">
             <label for="page" class="block text-gray-700 font-semibold"
               >Page</label
@@ -101,16 +63,109 @@
         </div>
       </div>
     </div>
+    <Modal v-if="selectedOrder" class="w-full !max-w-[90%]">
+      <template #header
+        ><h2 class="text-lg leading-6 font-medium text-gray-900">
+          Order#{{ selectedOrder.id }} Order items
+        </h2></template
+      >
+      <template #body>
+        <Table :headers="orderItemTableHeaders" :rows="mappedOrderItems" />
+        <div class="mt-4 flex justify-end gap-2">
+          <div class="flex gap-2 items-center justify-end">
+            <label for="page" class="block text-gray-700 font-semibold"
+              >Page</label
+            >
+            <select
+              id="orderItemPage"
+              class="px-4 py-2 border rounded-lg focus:outline-none focus:border-indigo-500"
+              v-model="orderItemPage"
+            >
+              <option
+                v-for="option of orderItemPageOptions"
+                :key="option.value"
+                :value="option.value"
+              >
+                {{ option.label }}
+              </option>
+            </select>
+          </div>
+        </div>
+      </template>
+      <template #footer>
+        <div class="flex justify-end gap-2 w-full">
+          <button
+            @click="() => clearSelectedOrder()"
+            class="bg-red-800 text-white p-2 rounded hover:bg-gray-700"
+          >
+            Close
+          </button>
+        </div>
+      </template>
+    </Modal>
   </div>
 </template>
 
 <script setup lang="ts">
-import type { Order, OrderStatus } from "~/interfaces";
-import { orderStatusOptions } from "~/utils/constants";
+import type { Order, OrderItem, OrderStatus, TableHeader } from "~/interfaces";
+import {
+  OrderItemAssociationView,
+  orderStatusOptions,
+} from "~/utils/constants";
 
 definePageMeta({
   middleware: "auth",
 });
+
+const tableHeaders: TableHeader[] = [
+  {
+    label: "Id",
+    key: "id",
+  },
+  {
+    label: "Total amount",
+    key: "totalAmount",
+  },
+  {
+    label: "Status",
+    key: "mappedStatus",
+  },
+  {
+    label: "Created at",
+    key: "createdAt",
+  },
+  {
+    label: "Updated at",
+    key: "updatedAt",
+  },
+  {
+    label: "Action",
+    key: "action",
+  },
+];
+const orderItemTableHeaders: TableHeader[] = [
+  {
+    label: "Id",
+    key: "id",
+  },
+
+  {
+    label: "Product",
+    key: "product",
+  },
+  {
+    label: "Price",
+    key: "price",
+  },
+  {
+    label: "Quantity",
+    key: "quantity",
+  },
+  {
+    label: "Total amount",
+    key: "totalAmount",
+  },
+];
 
 const nuxtApp = useNuxtApp();
 const { $toast } = nuxtApp;
@@ -128,6 +183,12 @@ const totalPage = ref(1);
 const totalItem = ref(0);
 const data = ref<Order[]>([]);
 
+const selectedOrder = ref<Order>();
+const orderItems = ref<OrderItem[]>([]);
+const orderItemPage = ref(1);
+const orderItemTotalPage = ref(1);
+const orderItemTotalItem = ref(0);
+
 const pageOptions = computed(() => {
   const pages = [];
   for (let i = 1; i <= totalPage.value; i++) {
@@ -138,6 +199,42 @@ const pageOptions = computed(() => {
   }
   return pages;
 });
+
+const orderItemPageOptions = computed(() => {
+  const pages = [];
+  for (let i = 1; i <= orderItemTotalPage.value; i++) {
+    pages.push({
+      label: i,
+      value: i,
+    });
+  }
+  return pages;
+});
+
+const mappedRows = computed(() => {
+  return data.value.map((e) => ({
+    ...e,
+    mappedStatus: mapOrderStatus[e.status],
+    createdAt: formatDateTime(e.createdAt),
+    updatedAt: formatDateTime(e.updatedAt),
+  }));
+});
+
+const mappedOrderItems = computed(() => {
+  return orderItems.value.map((e) => ({
+    ...e,
+    product: e.product?.name,
+    totalAmount: +e.price * e.quantity,
+  }));
+});
+
+const clearSelectedOrder = () => {
+  selectedOrder.value = undefined;
+  orderItems.value = [];
+  orderItemPage.value = 1;
+  orderItemTotalPage.value = 1;
+  orderItemTotalItem.value = 0;
+};
 
 const payOrder = async (orderId: number) => {
   if (!authStore.accessToken) {
@@ -192,6 +289,37 @@ const getOrders = async () => {
 
   setLoading(false);
 };
+const getOrderItems = async () => {
+  if (!authStore.accessToken) {
+    return;
+  }
+
+  setLoading(true);
+  const { response, error } = await fetchData(
+    `order-item-association/${OrderItemAssociationView.orderItemProduct}`,
+    {
+      query: {
+        page: orderItemPage.value,
+        limit: 10,
+        count: true,
+        orderId: selectedOrder.value?.id,
+      },
+    }
+  );
+
+  if (response) {
+    orderItems.value = response.data;
+    orderItemTotalPage.value = Math.ceil(response.totalItem / 10);
+    orderItemTotalItem.value = response.totalItem || 0;
+  }
+  if (error) {
+    $toast(error?.data?.message || "Fetch order items failed.", {
+      type: "error",
+    });
+  }
+
+  setLoading(false);
+};
 
 watch(page, async (page) => {
   totalPage.value = 1;
@@ -199,11 +327,26 @@ watch(page, async (page) => {
   await getOrders();
 });
 
+watch(orderItemPage, async (page) => {
+  orderItemTotalPage.value = 1;
+  orderItemTotalItem.value = 0;
+  await getOrderItems();
+});
+
 watch(orderStatus, async (orderStatus) => {
   page.value = 1;
   totalPage.value = 1;
   totalItem.value = 0;
   await getOrders();
+});
+
+watch(selectedOrder, async (selectedOrder) => {
+  if (selectedOrder?.id) {
+    page.value = 1;
+    totalPage.value = 1;
+    totalItem.value = 0;
+    await getOrderItems();
+  }
 });
 
 await getOrders();

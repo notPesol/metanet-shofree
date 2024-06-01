@@ -27,3 +27,7 @@ export const mapOrderStatus = {
   pending: 'Pending',
   paid: 'Paid',
 }
+
+export enum OrderItemAssociationView {
+  orderItemProduct = "order-item-product",
+}

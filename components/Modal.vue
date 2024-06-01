@@ -4,6 +4,7 @@
   >
     <div
       class="bg-white rounded-lg overflow-hidden shadow-xl transform transition-all max-w-lg w-full"
+      :class="class"
     >
       <div class="p-4">
         <slot name="header" />
@@ -24,4 +25,6 @@
 defineEmits<{
   clickOutside: [];
 }>();
+
+defineProps<{ class?: string }>();
 </script>

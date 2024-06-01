@@ -3,59 +3,22 @@
     <div>
       <h1 class="text-3xl font-bold mb-4">Products</h1>
       <div class="bg-white p-6 rounded-lg shadow-md">
-        <table class="min-w-full">
-          <thead>
-            <tr>
-              <th
-                class="p-2 bg-gray-200 text-left text-sm font-medium text-gray-700"
-              >
-                Id
-              </th>
-              <th
-                class="p-2 bg-gray-200 text-left text-sm font-medium text-gray-700"
-              >
-                Name
-              </th>
-              <th
-                class="p-2 bg-gray-200 text-left text-sm font-medium text-gray-700"
-              >
-                Description
-              </th>
-              <th
-                class="p-2 bg-gray-200 text-left text-sm font-medium text-gray-700"
-              >
-                Price
-              </th>
-              <th
-                class="p-2 bg-gray-200 text-left text-sm font-medium text-gray-700"
-              >
-                Stock
-              </th>
-              <th
-                class="p-2 bg-gray-200 text-left text-sm font-medium text-gray-700"
-              >
-                Action
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="product in data" :key="product.id" class="border-t">
-              <td class="p-2">{{ product.id }}</td>
-              <td class="p-2">{{ product.name }}</td>
-              <td class="p-2">{{ product.description || "-" }}</td>
-              <td class="p-2">{{ product.price }}</td>
-              <td class="p-2">{{ product.stock }}</td>
-              <td class="p-2">
-                <button
-                  @click="selectedProduct = product"
-                  class="bg-green-700 text-white p-2 rounded hover:bg-gray-700"
-                >
-                  Add to cart
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <Table :headers="tableHeaders" :rows="data">
+          <template #description="{ row }">
+            {{ row.description || "-" }}
+          </template>
+          <template #updatedAt="{ row }">
+            {{ formatDateTime(row.updatedAt) }}
+          </template>
+          <template #action="{ row }">
+            <button
+              @click="selectedProduct = row"
+              class="bg-green-700 text-white p-2 rounded hover:bg-gray-700"
+            >
+              Add to cart
+            </button>
+          </template>
+        </Table>
         <div class="mt-4 flex gap-2 items-center justify-end">
           <label for="page" class="block text-gray-700 font-semibold"
             >Page</label
@@ -121,11 +84,42 @@
 </template>
 
 <script setup lang="ts">
-import type { CreateCartItem, Product } from "~/interfaces";
+import type { CreateCartItem, Product, TableHeader } from "~/interfaces";
 
 definePageMeta({
   middleware: "auth",
 });
+
+const tableHeaders: TableHeader[] = [
+  {
+    label: "Id",
+    key: "id",
+  },
+  {
+    label: "Name",
+    key: "name",
+  },
+  {
+    label: "Description",
+    key: "description",
+  },
+  {
+    label: "Price",
+    key: "price",
+  },
+  {
+    label: "Stock",
+    key: "stock",
+  },
+  {
+    label: "Updated at",
+    key: "updatedAt",
+  },
+  {
+    label: "Action",
+    key: "action",
+  },
+];
 
 const nuxtApp = useNuxtApp();
 const { $toast } = nuxtApp;

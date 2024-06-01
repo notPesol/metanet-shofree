@@ -75,3 +75,20 @@ export interface Order {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface TableHeader {
+  label: string;
+  key: string;
+}
+
+export interface OrderItem {
+  id: number;
+  orderId: number;
+  productId: number;
+  quantity: number;
+  price: string;
+  isDeleted: boolean;
+  createdAt: string;
+  updatedAt: string;
+  product?: Product;
+}
