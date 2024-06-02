@@ -3,7 +3,16 @@
     <div>
       <h1 class="text-3xl font-bold mb-4">Cart</h1>
       <div class="bg-white p-6 rounded-lg shadow-md">
-        <Table :headers="tableHeaders" :rows="mappedRows" />
+        <Table :headers="tableHeaders" :rows="mappedRows">
+          <template #action="{ row }">
+            <button
+              @click="() => deleteCartItem(row.id)"
+              class="bg-red-800 text-white p-2 rounded hover:bg-gray-700"
+            >
+              Delete
+            </button>
+          </template>
+        </Table>
         <div class="mt-4 flex justify-between gap-2">
           <button
             v-if="totalItem"
@@ -65,6 +74,10 @@ const tableHeaders: TableHeader[] = [
     label: "Total price",
     key: "totalPrice",
   },
+  {
+    label: "Action",
+    key: "action",
+  },
 ];
 
 const nuxtApp = useNuxtApp();
@@ -101,6 +114,28 @@ const mappedRows = computed(() => {
     totalPrice: (e.product?.price || 0) * e.quantity,
   }));
 });
+
+const deleteCartItem = async (id: number) => {
+  if (!authStore.accessToken) {
+    return;
+  }
+
+  setLoading(true);
+  const { response, error } = await fetchData(`cart-item/me/${id}`, {
+    method: "DELETE",
+  });
+
+  if (response?.message === "success") {
+    $toast(`Delete cart item successfully.`, { type: "success" });
+    await getCartItems();
+  }
+  if (error) {
+    $toast(error?.data?.message || "Delete cart item failed.", {
+      type: "error",
+    });
+  }
+  setLoading(false);
+};
 
 const makeOrder = async () => {
   if (!authStore.accessToken) {
