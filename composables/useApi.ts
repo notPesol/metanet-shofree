@@ -1,10 +1,12 @@
+import type { HttpMethod } from "~/interfaces";
+
 export const useApi = () => {
   const config = useRuntimeConfig();
   const authStore = useAuthStore();
 
   const fetchData = async (
     path: string,
-    options?: { method?: any; body?: any; query?: any }
+    options?: { method?: HttpMethod; body?: any; query?: Record<string, any> }
   ) => {
     let response: any;
     let error: any;

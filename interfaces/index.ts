@@ -92,3 +92,5 @@ export interface OrderItem {
   updatedAt: string;
   product?: Product;
 }
+
+export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "HEAD" | "OPTIONS";
