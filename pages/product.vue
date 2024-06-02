@@ -39,7 +39,7 @@
         </div>
       </div>
     </div>
-    <Modal v-if="selectedProduct">
+    <Modal v-if="selectedProduct" @clickOutside="() => closeModal()">
       <template #header>
         <h2 class="text-lg leading-6 font-medium text-gray-900">Add to cart</h2>
       </template>

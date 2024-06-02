@@ -63,7 +63,11 @@
         </div>
       </div>
     </div>
-    <Modal v-if="selectedOrder" class="w-full !max-w-[90%]">
+    <Modal
+      v-if="selectedOrder"
+      class="w-full !max-w-[90%]"
+      @clickOutside="() => clearSelectedOrder()"
+    >
       <template #header
         ><h2 class="text-lg leading-6 font-medium text-gray-900">
           Order#{{ selectedOrder.id }} Order items
