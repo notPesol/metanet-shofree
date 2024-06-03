@@ -1,8 +1,8 @@
-import type { User } from "~/interfaces";
+import type { IUser } from "~/interfaces";
 
 interface IAuthState {
   accessToken: string;
-  user: User | null;
+  user: IUser | null;
 }
 
 export const useAuthStore = defineStore("auth", {

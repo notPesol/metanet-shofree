@@ -28,7 +28,7 @@
 </template>
 
 <script setup lang="ts">
-import type { TableHeader } from "~/interfaces";
+import type { ITableHeader } from "~/interfaces";
 
-defineProps<{ headers: TableHeader[]; rows: Array<any> }>();
+defineProps<{ headers: ITableHeader[]; rows: Array<any> }>();
 </script>

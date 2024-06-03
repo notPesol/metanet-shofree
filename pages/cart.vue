@@ -46,14 +46,14 @@
 </template>
 
 <script setup lang="ts">
-import type { CartItem, TableHeader } from "~/interfaces";
+import type { ICartItem, IOrder, IResponse, ITableHeader } from "~/interfaces";
 import { CartItemAssociationView } from "~/utils/constants";
 
 definePageMeta({
   middleware: "auth",
 });
 
-const tableHeaders: TableHeader[] = [
+const tableHeaders: ITableHeader[] = [
   {
     label: "Id",
     key: "id",
@@ -93,7 +93,7 @@ const { fetchData } = useApi();
 const page = ref(1);
 const totalPage = ref(1);
 const totalItem = ref(0);
-const data = ref<CartItem[]>([]);
+const data = ref<ICartItem[]>([]);
 
 const pageOptions = computed(() => {
   const pages = [];
@@ -121,9 +121,12 @@ const deleteCartItem = async (id: number) => {
   }
 
   setLoading(true);
-  const { response, error } = await fetchData(`cart-item/me/${id}`, {
-    method: "DELETE",
-  });
+  const { response, error } = await fetchData<IResponse<number>>(
+    `cart-item/me/${id}`,
+    {
+      method: "DELETE",
+    }
+  );
 
   if (response?.message === "success") {
     $toast(`Delete cart item successfully.`, { type: "success" });
@@ -143,9 +146,12 @@ const makeOrder = async () => {
   }
 
   setLoading(true);
-  const { response, error } = await fetchData("order-association", {
-    method: "POST",
-  });
+  const { response, error } = await fetchData<IResponse<IOrder>>(
+    "order-association",
+    {
+      method: "POST",
+    }
+  );
 
   if (response?.message === "success") {
     $toast(`Make an order successfully.`, { type: "success" });
@@ -165,7 +171,7 @@ const getCartItems = async () => {
   }
 
   setLoading(true);
-  const { response, error } = await fetchData(
+  const { response, error } = await fetchData<IResponse<ICartItem[]>>(
     `cart-item-association/me/${CartItemAssociationView.cartItemProduct}`,
     {
       query: { page: page.value, limit: 10, count: true },

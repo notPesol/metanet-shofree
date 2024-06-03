@@ -4,14 +4,14 @@ export const useApi = () => {
   const config = useRuntimeConfig();
   const authStore = useAuthStore();
 
-  const fetchData = async (
+  const fetchData = async <R> (
     path: string,
     options?: { method?: HttpMethod; body?: any; query?: Record<string, any> }
   ) => {
-    let response: any;
+    let response: R | null = null;
     let error: any;
     try {
-      const res: any = await $fetch(`${config.public.apiBase}/${path}`, {
+      const res: any = await $fetch<R>(`${config.public.apiBase}/${path}`, {
         headers: makeHeaders(authStore.accessToken),
         ...options,
       });

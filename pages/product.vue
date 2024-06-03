@@ -84,13 +84,19 @@
 </template>
 
 <script setup lang="ts">
-import type { CreateCartItem, Product, TableHeader } from "~/interfaces";
+import type {
+  ICartItem,
+  ICreateCartItem,
+  IProduct,
+  IResponse,
+  ITableHeader,
+} from "~/interfaces";
 
 definePageMeta({
   middleware: "auth",
 });
 
-const tableHeaders: TableHeader[] = [
+const tableHeaders: ITableHeader[] = [
   {
     label: "Id",
     key: "id",
@@ -133,9 +139,9 @@ const { fetchData } = useApi();
 
 const page = ref(1);
 const totalPage = ref(1);
-const data = ref<Product[]>([]);
+const data = ref<IProduct[]>([]);
 
-const selectedProduct = ref<Product>();
+const selectedProduct = ref<IProduct>();
 const inputAmount = ref<number>(0);
 
 const pageOptions = computed(() => {
@@ -165,15 +171,18 @@ const addToCart = async () => {
   }
 
   setLoading(true);
-  const body: CreateCartItem = {
+  const body: ICreateCartItem = {
     userId: authStore.user?.id,
     productId: selectedProduct.value?.id,
     quantity: inputAmount.value,
   };
-  const { response, error } = await fetchData("cart-item", {
-    method: "POST",
-    body,
-  });
+  const { response, error } = await fetchData<IResponse<ICartItem>>(
+    "cart-item",
+    {
+      method: "POST",
+      body,
+    }
+  );
 
   if (response?.message === "success") {
     $toast(`Add to cart successfully.`, { type: "success" });
@@ -194,9 +203,12 @@ const getProducts = async () => {
   }
 
   setLoading(true);
-  const { response, error } = await fetchData("product", {
-    query: { page: page.value, limit: 10, count: true },
-  });
+  const { response, error } = await fetchData<IResponse<IProduct[]>>(
+    "product",
+    {
+      query: { page: page.value, limit: 10, count: true },
+    }
+  );
 
   if (response) {
     data.value = response.data;

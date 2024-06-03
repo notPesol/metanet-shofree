@@ -1,4 +1,4 @@
-export interface Wallet {
+export interface IWallet {
   id: number;
   userId: number;
   balance: string;
@@ -7,23 +7,23 @@ export interface Wallet {
   updatedAt: string;
 }
 
-export interface User {
+export interface IUser {
   id: number;
   username: string;
   isDeleted: boolean;
   createdAt: string;
   updatedAt: string;
-  wallet: Wallet;
+  wallet: IWallet;
 }
 
 export type TransactionType = "deposit" | "withdraw" | "payment";
 
-export interface CreateWalletTransaction {
+export interface ICreateWalletTransaction {
   transactionType: TransactionType;
   amount: number;
 }
 
-export interface Transaction {
+export interface ITransaction {
   id: number;
   userId: number;
   type: string;
@@ -33,7 +33,7 @@ export interface Transaction {
   updatedAt: string;
 }
 
-export interface Product {
+export interface IProduct {
   id: number;
   name: string;
   description: null;
@@ -44,13 +44,13 @@ export interface Product {
   updatedAt: string;
 }
 
-export interface CreateCartItem {
+export interface ICreateCartItem {
   userId?: number;
   productId?: number;
   quantity?: number;
 }
 
-export interface CartItem {
+export interface ICartItem {
   id: number;
   userId: number;
   productId: number;
@@ -58,7 +58,7 @@ export interface CartItem {
   isDeleted: boolean;
   createdAt: string;
   updatedAt: string;
-  product?: Product;
+  product?: IProduct;
 }
 
 export type OrderStatus = "pending" | "paid";
@@ -66,7 +66,7 @@ export type OrderStatus = "pending" | "paid";
 // | "completed"
 // | "cancelled";
 
-export interface Order {
+export interface IOrder {
   id: number;
   userId: number;
   totalAmount: string;
@@ -74,14 +74,15 @@ export interface Order {
   isDeleted: boolean;
   createdAt: string;
   updatedAt: string;
+  orderItems?: IOrderItem[];
 }
 
-export interface TableHeader {
+export interface ITableHeader {
   label: string;
   key: string;
 }
 
-export interface OrderItem {
+export interface IOrderItem {
   id: number;
   orderId: number;
   productId: number;
@@ -90,7 +91,13 @@ export interface OrderItem {
   isDeleted: boolean;
   createdAt: string;
   updatedAt: string;
-  product?: Product;
+  product?: IProduct;
 }
 
 export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "HEAD" | "OPTIONS";
+
+export interface IResponse<T> {
+  message: string;
+  totalItem: number;
+  data: T;
+}

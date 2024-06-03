@@ -111,7 +111,13 @@
 </template>
 
 <script setup lang="ts">
-import type { Order, OrderItem, OrderStatus, TableHeader } from "~/interfaces";
+import type {
+  IOrder,
+  IOrderItem,
+  OrderStatus,
+  ITableHeader,
+  IResponse,
+} from "~/interfaces";
 import {
   OrderItemAssociationView,
   orderStatusOptions,
@@ -121,7 +127,7 @@ definePageMeta({
   middleware: "auth",
 });
 
-const tableHeaders: TableHeader[] = [
+const tableHeaders: ITableHeader[] = [
   {
     label: "Id",
     key: "id",
@@ -147,7 +153,7 @@ const tableHeaders: TableHeader[] = [
     key: "action",
   },
 ];
-const orderItemTableHeaders: TableHeader[] = [
+const orderItemTableHeaders: ITableHeader[] = [
   {
     label: "Id",
     key: "id",
@@ -185,10 +191,10 @@ const orderStatus = ref<OrderStatus>("pending");
 const page = ref(1);
 const totalPage = ref(1);
 const totalItem = ref(0);
-const data = ref<Order[]>([]);
+const data = ref<IOrder[]>([]);
 
-const selectedOrder = ref<Order>();
-const orderItems = ref<OrderItem[]>([]);
+const selectedOrder = ref<IOrder>();
+const orderItems = ref<IOrderItem[]>([]);
 const orderItemPage = ref(1);
 const orderItemTotalPage = ref(1);
 const orderItemTotalItem = ref(0);
@@ -246,7 +252,7 @@ const payOrder = async (orderId: number) => {
   }
 
   setLoading(true);
-  const { response, error } = await fetchData(
+  const { response, error } = await fetchData<IResponse<IOrder>>(
     `order-association/payment/${orderId}`,
     {
       method: "POST",
@@ -271,7 +277,7 @@ const getOrders = async () => {
   }
 
   setLoading(true);
-  const { response, error } = await fetchData(`order/me`, {
+  const { response, error } = await fetchData<IResponse<IOrder[]>>(`order/me`, {
     query: {
       page: page.value,
       limit: 10,
@@ -299,7 +305,7 @@ const getOrderItems = async () => {
   }
 
   setLoading(true);
-  const { response, error } = await fetchData(
+  const { response, error } = await fetchData<IResponse<IOrderItem[]>>(
     `order-item-association/${OrderItemAssociationView.orderItemProduct}`,
     {
       query: {

@@ -46,7 +46,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Wallet } from "~/interfaces";
+import type { IResponse, IWallet } from "~/interfaces";
 
 definePageMeta({
   middleware: "auth",
@@ -63,7 +63,7 @@ const { setLoading } = uiStore;
 
 const { fetchData } = useApi();
 
-const wallet = ref<Wallet>();
+const wallet = ref<IWallet>();
 
 const getWallet = async (isShowToat: boolean = true) => {
   if (!authStore.accessToken) {
@@ -71,7 +71,7 @@ const getWallet = async (isShowToat: boolean = true) => {
   }
 
   setLoading(true);
-  const { response, error } = await fetchData("wallet/me");
+  const { response, error } = await fetchData<IResponse<IWallet>>("wallet/me");
   if (response) {
     wallet.value = response.data;
     if (isShowToat) {
